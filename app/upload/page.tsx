@@ -25,6 +25,14 @@ export default function UploadPage() {
     setIsUploading(true);
 
     const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("User not authenticated.");
+      setIsUploading(false);
+      return;
+    }
+
     const fileName = `${Date.now()}-${file.name}`;
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from("rfqs")
@@ -43,20 +51,33 @@ export default function UploadPage() {
 
     const publicUrl = urlData.publicUrl;
 
-    const { error: insertError } = await supabase.from("rfqs").insert([
+    const { data: newRow, error: insertError } = await supabase.from("rfqs").insert([
       {
         customer_name: "Pending Processing",
         status: "Pending",
         pdf_url: publicUrl,
       },
-    ]);
+    ]).select('id').single();
 
-    if (insertError) {
+    if (insertError || !newRow) {
       console.error("Error inserting data:", insertError);
       alert("Error inserting data.");
       setIsUploading(false);
       return;
     }
+
+    // Trigger n8n webhook (non-blocking)
+    fetch("/api/process-rfq", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        pdf_url: publicUrl,
+        user_email: user.email,
+        record_id: newRow.id,
+      }),
+    }).catch((error) => console.error("Error triggering webhook:", error));
 
     router.push("/dashboard");
   };
