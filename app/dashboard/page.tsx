@@ -95,10 +95,14 @@ export default async function DashboardPage() {
                 {rfqs && rfqs.length > 0 ? (
                   rfqs.map((rfq) => (
                     <tr key={rfq.id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">#{rfq.id.substring(0, 4)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        <Link href={`/dashboard/${rfq.id}`} className="hover:text-orange-500 hover:underline">
+                          #{rfq.id.substring(0, 4)}
+                        </Link>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
                         <Link href={`/dashboard/${rfq.id}`} className="hover:text-orange-500 hover:underline">
-                          {rfq.customer_name}
+                          {rfq.customer_name ? rfq.customer_name : <span className="text-gray-500 italic">Unknown Quote</span>}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
