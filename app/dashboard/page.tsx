@@ -96,7 +96,11 @@ export default async function DashboardPage() {
                   rfqs.map((rfq) => (
                     <tr key={rfq.id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">#{rfq.id.substring(0, 4)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{rfq.customer_name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
+                        <Link href={`/dashboard/${rfq.id}`} className="hover:text-orange-500 hover:underline">
+                          {rfq.customer_name}
+                        </Link>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           rfq.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
