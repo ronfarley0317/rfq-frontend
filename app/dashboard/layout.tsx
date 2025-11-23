@@ -1,11 +1,23 @@
+'use client';
+
 import { BarChart, HardHat, Settings, Building } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  const navItems = [
+    { href: '/dashboard', label: 'Quotes', icon: BarChart, exact: true },
+    { href: '/dashboard/inventory', label: 'Inventory', icon: HardHat },
+    { href: '/dashboard/clients', label: 'Clients', icon: Building },
+    { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+  ];
+
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       {/* Fixed Left Sidebar */}
@@ -14,22 +26,25 @@ export default function DashboardLayout({
           RFQ Engine
         </div>
         <nav className="flex-1 px-4 py-8 space-y-2">
-          <Link href="/dashboard" className="flex items-center px-4 py-2 text-lg text-slate-300 rounded-md hover:bg-slate-700">
-            <BarChart className="mr-3 h-6 w-6" />
-            Quotes
-          </Link>
-          <a href="#" className="flex items-center px-4 py-2 text-lg text-slate-300 rounded-md hover:bg-slate-700">
-            <HardHat className="mr-3 h-6 w-6" />
-            Inventory
-          </a>
-          <a href="#" className="flex items-center px-4 py-2 text-lg text-slate-300 rounded-md hover:bg-slate-700">
-            <Building className="mr-3 h-6 w-6" />
-            Clients
-          </a>
-          <a href="#" className="flex items-center px-4 py-2 text-lg text-slate-300 rounded-md hover:bg-slate-700">
-            <Settings className="mr-3 h-6 w-6" />
-            Settings
-          </a>
+          {navItems.map((item) => {
+            const isActive = item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center px-4 py-2 text-lg rounded-md hover:bg-slate-700 ${
+                  isActive ? 'bg-slate-700 text-white' : 'text-slate-300'
+                }`}
+              >
+                <Icon className="mr-3 h-6 w-6" />
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
       </aside>
 

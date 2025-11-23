@@ -9,18 +9,36 @@ export default async function DashboardPage() {
     .select('*')
     .order('created_at', { ascending: false });
 
+  // Calculate real stats
+  const completedRfqs = rfqs?.filter(rfq => rfq.status === 'Completed' || rfq.status === 'Approved') || [];
+  const totalRevenue = completedRfqs.reduce((sum, rfq) => sum + (rfq.amount || 0), 0);
+  const pendingCount = rfqs?.filter(rfq => rfq.status === 'Pending').length || 0;
+  const totalCount = rfqs?.length || 0;
+  const conversionRate = totalCount > 0 ? ((completedRfqs.length / totalCount) * 100).toFixed(1) : '0';
+
+  const formattedRevenue = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(totalRevenue);
+
   return (
     <main className="flex-1 p-8">
       <div className="flex justify-between items-start mb-8">
         {/* Stats Row */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-gray-500 text-sm font-medium">Total Revenue</h3>
-            <p className="text-3xl font-bold text-gray-800">$42,392</p>
+            <p className="text-3xl font-bold text-gray-800">{formattedRevenue}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-gray-500 text-sm font-medium">Pending Quotes</h3>
-            <p className="text-3xl font-bold text-gray-800">12</p>
+            <p className="text-3xl font-bold text-gray-800">{pendingCount}</p>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-gray-500 text-sm font-medium">Conversion Rate</h3>
+            <p className="text-3xl font-bold text-gray-800">{conversionRate}%</p>
           </div>
         </div>
 
