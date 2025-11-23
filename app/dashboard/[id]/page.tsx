@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
+import LineItemsTable from '@/components/LineItemsTable'
 
 type PageProps = {
   params: Promise<{
@@ -17,7 +18,8 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
       `
       id,
       customer_name,
-      status
+      status,
+      line_items
     `
     )
     .eq('id', id)
@@ -49,7 +51,7 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Line Items</h2>
         <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
-          <p className="text-gray-500 italic">Line items will be displayed here.</p>
+          <LineItemsTable initialItems={quote.line_items || []} />
         </div>
       </div>
     </div>
