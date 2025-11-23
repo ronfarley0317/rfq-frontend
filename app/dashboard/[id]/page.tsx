@@ -1,10 +1,17 @@
 import { createClient } from '@/utils/supabase/server'
 import LineItemsTable from '@/components/LineItemsTable'
+import GeneratePdfButton from '@/components/GeneratePdfButton'
 
 type PageProps = {
   params: Promise<{
     id: string
   }>
+}
+
+interface LineItem {
+  quantity: number;
+  description: string;
+  unit_price: number;
 }
 
 export default async function QuoteDetailsPage({ params }: PageProps) {
@@ -34,31 +41,46 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
     return <div className="p-6">Error loading quote. Check terminal for details.</div>
   }
 
-  let displayCustomerName = "Unknown Customer";
-  if (quote.customer_name) {
+  const rfq = quote
+  let cleanName: string
+
+  if (rfq.customer_name) {
     try {
-      const parsedName = JSON.parse(quote.customer_name);
-      if (parsedName && typeof parsedName === 'object' && parsedName.customer_name) {
-        displayCustomerName = parsedName.customer_name;
+      const parsed = JSON.parse(rfq.customer_name)
+      if (parsed && parsed.customer_name) {
+        cleanName = parsed.customer_name
       } else {
-        displayCustomerName = quote.customer_name;
+        cleanName = rfq.customer_name
       }
-    } catch (_e) {
-      displayCustomerName = quote.customer_name;
+    } catch (error) {
+      cleanName = rfq.customer_name
     }
+  } else {
+    cleanName = "Unknown Customer"
   }
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-4">
-        Quote Details: #{quote.id}
-      </h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Quote Details: #{quote.id}
+        </h1>
+        <GeneratePdfButton
+          quoteId={quote.id}
+          customerName={cleanName}
+          items={quote.line_items?.map((item: LineItem) => ({
+            qty: item.quantity,
+            description: item.description,
+            price: item.unit_price,
+          })) || []}
+        />
+      </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <h3 className="text-xs font-bold text-slate-500 uppercase">Customer</h3>
-            <p className="mt-1 text-xl font-medium text-gray-900">{displayCustomerName}</p>
+            <p className="mt-1 text-xl font-medium text-gray-900">{cleanName}</p>
           </div>
           <div>
             <h3 className="text-xs font-bold text-slate-500 uppercase">Status</h3>
@@ -70,7 +92,7 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Line Items</h2>
         <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
-          <LineItemsTable initialItems={quote.line_items || []} />
+          <LineItemsTable initialItems={quote.line_items || []} quoteId={quote.id} />
         </div>
       </div>
     </div>

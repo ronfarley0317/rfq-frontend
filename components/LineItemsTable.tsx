@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { updateQuoteLineItems } from '@/app/actions/update-quote';
 
 type LineItem = {
   id: number;
@@ -12,15 +13,19 @@ type LineItem = {
 
 type LineItemsTableProps = {
   initialItems: LineItem[];
+  quoteId: string;
 };
 
-const LineItemsTable = ({ initialItems }: LineItemsTableProps) => {
+const LineItemsTable = ({ initialItems, quoteId }: LineItemsTableProps) => {
   const [items, setItems] = useState<LineItem[]>(() => {
     if (initialItems && initialItems.length > 0) {
       return initialItems;
     }
     return [{ id: 1, part_number: 'XJ-900', description: 'Turbo Encabulator', quantity: 5, unit_price: 500 }];
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success'>('idle');
+
 
   const handleInputChange = (id: number, field: keyof LineItem, value: string) => {
     const newItems = items.map(item => {
@@ -30,6 +35,21 @@ const LineItemsTable = ({ initialItems }: LineItemsTableProps) => {
       return item;
     });
     setItems(newItems);
+  };
+
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
+    setSaveStatus('idle');
+    try {
+      await updateQuoteLineItems(quoteId, items);
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 2000); // Reset after 2 seconds
+    } catch (error) {
+      console.error(error);
+      alert('Error saving changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -73,9 +93,17 @@ const LineItemsTable = ({ initialItems }: LineItemsTableProps) => {
           ))}
         </tbody>
       </table>
-      <div className="mt-4 flex justify-end">
-        <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
-          Save Changes
+      <div className="mt-4 flex justify-end space-x-4">
+        <button
+          onClick={handleSaveChanges}
+          disabled={isSaving || saveStatus === 'success'}
+          className={`font-bold py-2 px-4 rounded ${
+            saveStatus === 'success'
+              ? 'bg-green-500 text-white'
+              : 'bg-orange-500 hover:bg-orange-600 text-white'
+          } disabled:opacity-50`}
+        >
+          {isSaving ? 'Saving...' : saveStatus === 'success' ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
     </div>
