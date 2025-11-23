@@ -12,6 +12,7 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
   const { id } = await params
   const supabase = await createClient()
 
+  console.log("Attempting to fetch ID:", id);
   const { data: quote, error } = await supabase
     .from('rfqs')
     .select(
@@ -25,8 +26,13 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
     .eq('id', id)
     .single()
 
-  if (error || !quote) {
-    notFound()
+  if (error) {
+    console.error("Supabase Error Details:", error)
+    return <div className="p-6">Error loading quote. Check terminal for details.</div>
+  }
+
+  if (!quote) {
+    return <div className="p-6">Error loading quote. Check terminal for details.</div>
   }
 
   return (
