@@ -1,4 +1,5 @@
 import { BarChart, HardHat, Settings, Building } from 'lucide-react';
+import Link from 'next/link';
 
 export default function DashboardLayout({
   children,
@@ -13,10 +14,10 @@ export default function DashboardLayout({
           RFQ Engine
         </div>
         <nav className="flex-1 px-4 py-8 space-y-2">
-          <a href="/dashboard" className="flex items-center px-4 py-2 text-lg text-slate-300 rounded-md hover:bg-slate-700">
+          <Link href="/dashboard" className="flex items-center px-4 py-2 text-lg text-slate-300 rounded-md hover:bg-slate-700">
             <BarChart className="mr-3 h-6 w-6" />
             Quotes
-          </a>
+          </Link>
           <a href="#" className="flex items-center px-4 py-2 text-lg text-slate-300 rounded-md hover:bg-slate-700">
             <HardHat className="mr-3 h-6 w-6" />
             Inventory

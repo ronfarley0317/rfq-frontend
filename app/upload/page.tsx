@@ -34,7 +34,7 @@ export default function UploadPage() {
     }
 
     const fileName = `${Date.now()}-${file.name}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("rfqs")
       .upload(fileName, file);
 
