@@ -2,12 +2,13 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 
 type PageProps = {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function QuoteDetailsPage({ params }: PageProps) {
+  const { id } = await params
   const supabase = await createClient()
 
   const { data: quote, error } = await supabase
@@ -19,7 +20,7 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
       status
     `
     )
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !quote) {
