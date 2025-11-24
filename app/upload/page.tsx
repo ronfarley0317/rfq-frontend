@@ -33,10 +33,13 @@ export default function UploadPage() {
       return;
     }
 
-    const fileName = `${Date.now()}-${file.name}`;
+    const fileExt = file.name.split('.').pop();
+    const sanitizedFileName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9]/g, '_');
+    const cleanFileName = `${Date.now()}_${sanitizedFileName}.${fileExt}`;
+
     const { error: uploadError } = await supabase.storage
       .from("rfqs")
-      .upload(fileName, file);
+      .upload(cleanFileName, file);
 
     if (uploadError) {
       console.error("Error uploading file:", uploadError);
@@ -55,7 +58,7 @@ export default function UploadPage() {
       {
         customer_name: "Pending Processing",
         status: "Pending",
-        pdf_url: publicUrl,
+        file_url: publicUrl,
       },
     ]).select('id').single();
 
@@ -73,7 +76,7 @@ export default function UploadPage() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        pdf_url: publicUrl,
+        file_url: publicUrl,
         user_email: user.email,
         record_id: newRow.id,
       }),
@@ -88,12 +91,13 @@ export default function UploadPage() {
         <label className="flex flex-col items-center justify-center w-full p-10 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50">
           <UploadCloud className="w-16 h-16 text-gray-400" />
           <p className="mt-4 text-lg text-gray-600">
-            {file ? file.name : "Drop RFQ PDF here"}
+            {file ? file.name : "Drop RFQ PDF, PNG, or Image here"}
           </p>
           <input
             type="file"
             onChange={handleFileChange}
             className="hidden"
+            accept="application/pdf,image/*"
           />
         </label>
         <button
