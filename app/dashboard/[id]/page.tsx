@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import LineItemsTable from '@/components/LineItemsTable'
 import GeneratePdfButton from '@/components/GeneratePdfButton'
+import StatusDropdown from '@/components/StatusDropdown'
+
 
 type PageProps = {
   params: Promise<{
@@ -24,9 +26,11 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
     .select(
       `
       id,
+      quote_number,
       customer_name,
       status,
-      line_items
+      line_items,
+      tax
     `
     )
     .eq('id', id)
@@ -52,7 +56,7 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
       } else {
         cleanName = rfq.customer_name
       }
-    } catch (error) {
+    } catch {
       cleanName = rfq.customer_name
     }
   } else {
@@ -63,11 +67,13 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-semibold text-gray-900">
-          Quote Details: #{quote.id}
+          Quote #{quote.quote_number}
         </h1>
         <GeneratePdfButton
           quoteId={quote.id}
+          quoteNumber={quote.quote_number}
           customerName={cleanName}
+          tax={quote.tax}
           items={quote.line_items?.map((item: LineItem) => ({
             qty: item.quantity,
             description: item.description,
@@ -84,7 +90,7 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
           </div>
           <div>
             <h3 className="text-xs font-bold text-slate-500 uppercase">Status</h3>
-            <p className="mt-1 text-xl font-medium text-gray-900">{quote.status}</p>
+            <StatusDropdown quoteId={quote.id} currentStatus={quote.status} />
           </div>
         </div>
       </div>
@@ -92,7 +98,7 @@ export default async function QuoteDetailsPage({ params }: PageProps) {
       <div>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Line Items</h2>
         <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
-          <LineItemsTable initialItems={quote.line_items || []} quoteId={quote.id} />
+          <LineItemsTable initialItems={quote.line_items || []} quoteId={quote.id} initialTax={quote.tax} />
         </div>
       </div>
     </div>

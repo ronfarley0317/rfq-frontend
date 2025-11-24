@@ -6,7 +6,7 @@ export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: rfqs } = await supabase
     .from('rfqs')
-    .select('*')
+    .select('id, quote_number, customer_name, status, amount, created_at')
     .order('created_at', { ascending: false });
 
   // Calculate real stats
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
         <table className="w-full text-left">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+              <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Quote #</th>
               <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
               <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Amount</th>
@@ -71,7 +71,7 @@ export default async function DashboardPage() {
                 <tr key={rfq.id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     <Link href={`/dashboard/${rfq.id}`} className="hover:text-orange-500 hover:underline">
-                      #{rfq.id.substring(0, 4)}...
+                      Quote #{rfq.quote_number}
                     </Link>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
