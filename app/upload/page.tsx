@@ -50,7 +50,7 @@ export default function UploadPage() {
 
     const { data: urlData } = supabase.storage
       .from("rfqs")
-      .getPublicUrl(fileName);
+      .getPublicUrl(cleanFileName);
 
     const publicUrl = urlData.publicUrl;
 
