@@ -9,8 +9,9 @@ export async function uploadQuote(formData: FormData) {
   const file = formData.get("file") as File;
   const user = await supabase.auth.getUser();
   const userId = user.data.user?.id;
+  const userEmail = user.data.user?.email;
 
-  if (!userId) {
+  if (!userId || !userEmail) {
     throw new Error("User not found");
   }
 
@@ -48,6 +49,32 @@ export async function uploadQuote(formData: FormData) {
   if (quoteError) {
     console.error("Error inserting quote:", quoteError);
     throw new Error(`Error inserting quote: ${quoteError.message} (Code: ${quoteError.code})`);
+  }
+
+  const recordId = quoteData[0]?.id;
+
+  if (recordId) {
+    // Trigger n8n webhook
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/process-rfq`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pdf_url: publicUrlData.publicUrl,
+          user_email: userEmail,
+          record_id: recordId,
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to trigger n8n webhook:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error triggering n8n webhook:', error);
+      // Continue anyway - don't block the user flow
+    }
   }
 
   revalidatePath("/dashboard");

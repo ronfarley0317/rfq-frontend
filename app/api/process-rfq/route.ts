@@ -9,12 +9,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required parameters.' }, { status: 400 });
     }
 
-    const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
-
-    if (!n8nWebhookUrl) {
-      console.error('N8N_WEBHOOK_URL is not set.');
-      return NextResponse.json({ error: 'Server configuration error.' }, { status: 500 });
-    }
+    const n8nWebhookUrl = 'http://localhost:5678/webhook-test/process-rfq';
 
     const response = await fetch(n8nWebhookUrl, {
       method: 'POST',
