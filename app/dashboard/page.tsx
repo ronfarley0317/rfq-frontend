@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   // Calculate real stats
   const completedRfqs = rfqs?.filter(rfq => rfq.status === 'Completed' || rfq.status === 'Approved') || [];
   const totalRevenue = completedRfqs.reduce((sum, rfq) => sum + (rfq.amount || 0), 0);
-  const pendingCount = rfqs?.filter(rfq => rfq.status === 'Pending').length || 0;
+  const pendingCount = rfqs?.filter(rfq => rfq.status === 'Pending' || rfq.status === 'processing').length || 0;
   const totalCount = rfqs?.length || 0;
   const conversionRate = totalCount > 0 ? ((completedRfqs.length / totalCount) * 100).toFixed(1) : '0';
 
@@ -82,6 +82,7 @@ export default async function DashboardPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       rfq.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                      rfq.status === 'processing' ? 'bg-blue-100 text-blue-800' :
                       rfq.status === 'Completed' ? 'bg-green-100 text-green-800' :
                       'bg-gray-100 text-gray-800'
                     }`}>
